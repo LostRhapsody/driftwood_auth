@@ -35,7 +35,7 @@ pub(crate) fn create_oauth_client() -> BasicClient {
         .expect("Invalid token endpoint URL");
 
     BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url)).set_redirect_uri(
-        RedirectUrl::new(format!("http://{}/callback", host))
+        RedirectUrl::new(format!("https://{}/callback", host))
             .expect("Invalid redirect URL"),
     )
 }
