@@ -12,6 +12,7 @@ use std::env;
 
 // Encrypt the token
 fn encrypt_token(token: &str, public_key_pem: &str) -> String {
+    println!("Encrypting token");
     let public_key =
         RsaPublicKey::from_public_key_pem(public_key_pem).expect("failed to parse public key");
     let mut rng = OsRng;
@@ -22,6 +23,7 @@ fn encrypt_token(token: &str, public_key_pem: &str) -> String {
 }
 
 pub(crate) fn create_oauth_client() -> BasicClient {
+    println!("Creating OAuth2.0 Client");
     dotenv().ok();
     let redirect_url = env::var("NETLIFY_REDIRECT_URI").expect("Missing HOST");
 
@@ -45,6 +47,7 @@ pub(crate) async fn initiate_login(
     session: Session,
     query: web::Query<std::collections::HashMap<String, String>>,
 ) -> impl Responder {
+    println!("Logging in...");
     let client = create_oauth_client();
     let (auth_url, _csrf_token) = client.authorize_url(oauth2::CsrfToken::new_random).url();
 
@@ -63,14 +66,20 @@ pub(crate) async fn handle_callback(
     client: web::Data<BasicClient>,
     session: Session,
 ) -> Result<impl Responder, actix_web::Error> {
+    println!("Callback...");
     let code = query
         .get("code")
         .ok_or_else(|| actix_web::error::ErrorBadRequest("No code in query string"))?;
+
+    println!("Code: {}", code);
+
     let auth_code = AuthorizationCode::new(code.to_string());
 
     let public_key_pem = session.get::<String>("public_key_pem")
         .map_err(|_| actix_web::error::ErrorInternalServerError("Failed to retrieve session data"))?
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("No public key found in session"))?;
+
+    print!("Public key pem: {}", public_key_pem);
 
     let token_result = client
         .get_ref()
@@ -83,6 +92,8 @@ pub(crate) async fn handle_callback(
         })?;
 
     let access_token = token_result.access_token().secret();
+    println!("Token: {}", access_token);
     let encrypted_token = encrypt_token(access_token, &public_key_pem);
+    println!("Encrypted token: {}", encrypted_token);
     Ok(HttpResponse::Ok().json(serde_json::json!({ "token": encrypted_token })))
 }
