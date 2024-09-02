@@ -119,7 +119,10 @@ pub(crate) async fn handle_callback(
     println!("Callback...");
     let code = query
         .get("code")
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("No code in query string"))?;
+        .ok_or_else(|| {
+            eprintln!("No code found in query");
+            actix_web::error::ErrorBadRequest("No code in query string")
+        })?;
 
     println!("Code: {}", code);
 
@@ -127,7 +130,10 @@ pub(crate) async fn handle_callback(
 
     let state = query
         .get("state")
-        .ok_or_else(|| actix_web::error::ErrorBadRequest("No state in query string"))?;
+        .ok_or_else(|| {
+            eprintln!("No state found in query");
+            actix_web::error::ErrorBadRequest("No state in query string")
+        })?;
 
     println!("State: {}", state);
 
