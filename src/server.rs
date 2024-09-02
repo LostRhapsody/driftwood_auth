@@ -129,6 +129,8 @@ pub(crate) async fn handle_callback(
         .get("state")
         .ok_or_else(|| actix_web::error::ErrorBadRequest("No state in query string"))?;
 
+    println!("State: {}", state);
+
     // retrieve public_key_pem from in-memory storage
     let public_key_pem = app_state.kv_store.get(state)
         .ok_or_else(|| {
