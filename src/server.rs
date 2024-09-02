@@ -68,9 +68,9 @@ pub(crate) async fn handle_callback(
         .ok_or_else(|| actix_web::error::ErrorBadRequest("No code in query string"))?;
     let auth_code = AuthorizationCode::new(code.to_string());
 
-    let public_key_pem = session.get::<String>("public_key_pem")
-        .map_err(|_| actix_web::error::ErrorInternalServerError("Failed to retrieve session data"))?
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("No public key found in session"))?;
+    // let public_key_pem = session.get::<String>("public_key_pem")
+    //     .map_err(|_| actix_web::error::ErrorInternalServerError("Failed to retrieve session data"))?
+    //     .ok_or_else(|| actix_web::error::ErrorInternalServerError("No public key found in session"))?;
 
     let token_result = client
         .get_ref()
@@ -83,6 +83,6 @@ pub(crate) async fn handle_callback(
         })?;
 
     let access_token = token_result.access_token().secret();
-    let encrypted_token = encrypt_token(access_token, &public_key_pem);
-    Ok(HttpResponse::Ok().json(serde_json::json!({ "encrypted_token": encrypted_token })))
+    // let encrypted_token = encrypt_token(access_token, &public_key_pem);
+    Ok(HttpResponse::Ok().json(serde_json::json!({ "token": access_token })))
 }
