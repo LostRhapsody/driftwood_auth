@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.0"
+actix-session = { version = "0.10.0", features = ["cookie-session"] }
 tokio = { version = "1.40.0", features = ["full"] }
 oauth2 = "4.3"
 dotenv = "0.15"
