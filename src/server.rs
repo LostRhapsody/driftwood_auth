@@ -22,7 +22,7 @@ fn encrypt_token(token: &str, public_key_pem: &str) -> String {
 
 pub(crate) fn create_oauth_client() -> BasicClient {
     dotenv().ok();
-    let host = env::var("HOST").expect("Missing HOST");
+    let redirect_url = env::var("NETLIFY_REDIRECT_URI").expect("Missing HOST");
 
     let client_id =
         ClientId::new(env::var("NETLIFY_CLIENT_ID").expect("Missing NETLIFY_CLIENT_ID"));
@@ -35,7 +35,7 @@ pub(crate) fn create_oauth_client() -> BasicClient {
         .expect("Invalid token endpoint URL");
 
     BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url)).set_redirect_uri(
-        RedirectUrl::new(format!("https://{}/callback", host))
+        RedirectUrl::new(redirect_url)
             .expect("Invalid redirect URL"),
     )
 }
