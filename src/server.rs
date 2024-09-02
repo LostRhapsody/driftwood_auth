@@ -9,6 +9,7 @@ use oauth2::{
 use rand::rngs::OsRng;
 use rsa::{pkcs8::DecodePublicKey, Pkcs1v15Encrypt, RsaPublicKey};
 use std::env;
+use reqwest::Client as ReqwestClient;
 
 // Encrypt the token
 fn encrypt_token(token: &str, public_key_pem: &str) -> String {
@@ -84,5 +85,25 @@ pub(crate) async fn handle_callback(
 
     let access_token = token_result.access_token().secret();
     let encrypted_token = encrypt_token(access_token, &public_key_pem);
-    Ok(HttpResponse::Ok().json(serde_json::json!({ "encrypted_token": encrypted_token })))
+    
+    // Send the encrypted token to the client's localhost
+    let reqwest_client = ReqwestClient::new();
+    let response = reqwest_client
+        .post("http://127.0.0.1:8080/")
+        .json(&serde_json::json!({ "encrypted_token": encrypted_token }))
+        .send()
+        .await
+        .map_err(|e| {
+            eprintln!("Failed to send token to client: {:?}", e);
+            actix_web::error::ErrorInternalServerError("Failed to send token to client")
+        })?;
+
+    if response.status().is_success() {
+        // Redirect to a success page
+        Ok(HttpResponse::Found()
+            .append_header(("Location", "/auth-success"))
+            .finish())
+    } else {
+        Err(actix_web::error::ErrorInternalServerError("Failed to send token to client"))
+    }
 }
