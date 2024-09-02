@@ -42,16 +42,16 @@ pub(crate) fn create_oauth_client() -> BasicClient {
 }
 
 pub(crate) async fn initiate_login(
-    session: Session,
-    query: web::Query<std::collections::HashMap<String, String>>,
+    // session: Session,
+    // query: web::Query<std::collections::HashMap<String, String>>,
 ) -> impl Responder {
     let client = create_oauth_client();
     let (auth_url, _csrf_token) = client.authorize_url(oauth2::CsrfToken::new_random).url();
 
-    let public_key_pem = query.get("public_key_pem").unwrap();
+    // let public_key_pem = query.get("public_key_pem").unwrap();
 
     // Store the public_key_pem in the session
-    session.insert("public_key_pem", public_key_pem).unwrap();
+    // session.insert("public_key_pem", public_key_pem).unwrap();
 
     HttpResponse::Found()
         .append_header(("Location", auth_url.to_string()))

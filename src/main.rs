@@ -11,14 +11,14 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     // Generate a random secret key for cookie encryption
-    let secret_key = Key::generate();
+    // let secret_key = Key::generate();
 
     HttpServer::new(move || {
         App::new()
-            .wrap(SessionMiddleware::new(
-                CookieSessionStore::default(),
-                secret_key.clone(),
-            ))
+            // .wrap(SessionMiddleware::new(
+            //     CookieSessionStore::default(),
+            //     secret_key.clone(),
+            // ))
             .app_data(oauth_client.clone())
             .route("/login", web::get().to(server::initiate_login))
             .route("/callback", web::get().to(server::handle_callback))
